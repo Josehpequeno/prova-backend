@@ -26,7 +26,7 @@ type Response struct {
 func minUppercase(s string, x int) bool {
 	count := 0
 	for _, r := range s {
-		if unicode.IsUpper(r) {
+		if unicode.IsLetter(r) && unicode.IsUpper(r) {
 			count++
 		}
 	}
@@ -39,7 +39,7 @@ func minUppercase(s string, x int) bool {
 func minLowercase(s string, x int) bool {
 	count := 0
 	for _, r := range s {
-		if unicode.IsLower(r) {
+		if unicode.IsLetter(r) && unicode.IsLower(r) {
 			count++
 		}
 	}
@@ -81,7 +81,7 @@ func minSpecialChars(s string, x int) bool {
 		return false
 	}
 }
-func noRepeted(s string, x int) bool {
+func noRepeted(s string) bool {
 	for i := 1; i < len(s)-1; i++ {
 		if s[i] == s[i-1] || s[i] == s[i+1] {
 			return false
@@ -104,28 +104,28 @@ func strongPassword(body Body) Response {
 				noMatch = append(noMatch, rule)
 			}
 		case "minUppercase":
-			flag = minUppercase(body.Password, x)
-			if !flag {
+			if !minUppercase(body.Password, x) {
+				flag = false
 				noMatch = append(noMatch, rule)
 			}
 		case "minLowercase":
-			flag = minLowercase(body.Password, x)
-			if !flag {
+			if !minLowercase(body.Password, x) {
+				flag = false
 				noMatch = append(noMatch, rule)
 			}
 		case "minDigit":
-			flag = minDigit(body.Password, x)
-			if !flag {
+			if !minDigit(body.Password, x) {
+				flag = false
 				noMatch = append(noMatch, rule)
 			}
 		case "minSpecialChars":
-			flag = minSpecialChars(body.Password, x)
-			if !flag {
+			if !minSpecialChars(body.Password, x) {
+				flag = false
 				noMatch = append(noMatch, rule)
 			}
 		case "noRepeted":
-			flag = noRepeted(body.Password, x)
-			if !flag {
+			if !noRepeted(body.Password) {
+				flag = false
 				noMatch = append(noMatch, rule)
 			}
 		}
@@ -134,11 +134,11 @@ func strongPassword(body Body) Response {
 }
 
 func main() {
-	port := "8001"
+	port := "8080"
 	r := gin.Default()
 	r.POST("/verify", func(c *gin.Context) {
 		var body Body
-		if err := c.ShouldBindJSON(&body); err != nil {
+		if err := c.ShouldBind(&body); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
