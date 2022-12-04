@@ -1,8 +1,10 @@
 # Prova-Backend
 
 Backend feito em Golang e com a framework web Gin com padrão API REST. Servidor é executado na porta 8080 com a rota /verify.
+Autor do código Hícaro José Barbosa Soares [Josehpequeno](https://github.com/Josehpequeno).
 
 ### Dependências
+
 - [Go](https://go.dev/dl/)
 
 ### Executando Servidor
@@ -35,15 +37,15 @@ func main() {
 	r := gin.Default() //instanciando o router para criar rotas
 	r.POST("/verify", func(c *gin.Context) { // rota verify
 		var body Body
-		if err := c.ShouldBind(&body); err != nil { 
+		if err := c.ShouldBind(&body); err != nil {
                 // passando o json da requisição para a variavel body de tipo Body
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}) 
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
                 // caso haja erro é retornado para o cliente
 			return
 		}
-		response := strongPassword(body) 
+		response := strongPassword(body)
               // função que verifica a força da senha e retorna um objeto do tipo Respose
-		c.JSON(http.StatusOK, response) 
+		c.JSON(http.StatusOK, response)
                 // retorna a respota da função para o cliente
 	})
 	r.Run(":" + port)
@@ -60,8 +62,8 @@ type Body struct {
 	Password string `json:"password" binding:"required"`
 	Rules    []Rule `json:"rules" binding:"required"`
 }
-/* tipo Rule contém o Content (referenciado na requisição com a chave "rule") que armazena 
-a string da regra e o Value (referenciado na requisição com a chave "value") armazena 
+/* tipo Rule contém o Content (referenciado na requisição com a chave "rule") que armazena
+a string da regra e o Value (referenciado na requisição com a chave "value") armazena
 o valor da regra.
 */
 type Rule struct {
@@ -69,7 +71,7 @@ type Rule struct {
 	Value   int    `json:"value" binding:"required"`
 }
 /* Respose é o tipo da resposta ao cliente.
-Contém Verify um boolean que recebe o valor true se a senha é forte de acordo com as 
+Contém Verify um boolean que recebe o valor true se a senha é forte de acordo com as
 regras e false quando o contrário.
 Contém também o NoMatch que é o array de regras que a senha não foi aprovada.
 */
@@ -85,7 +87,7 @@ type Response struct {
 func strongPassword(body Body) Response {
 	noMatch := make([]string, 0) // array de regras em que password foi desaprovada
 	lenght := len(body.Rules)// tamanho do array de regras
-	flag := true 
+	flag := true
         // variável flag que indica se password foi desaprovada ou não nas regras.
 	for i := 0; i < lenght; i++ {//percorrendo as regras
 		rule := body.Rules[i].Content //regra a ser verificada
@@ -100,14 +102,14 @@ func strongPassword(body Body) Response {
 			}
 		case "minUppercase":
 			if !minUppercase(body.Password, x) {
-                        /*função que confere se tem o mínimo pedido de caracteres em 
+                        /*função que confere se tem o mínimo pedido de caracteres em
                         uppercase */
 				flag = false
 				noMatch = append(noMatch, rule)
 			}
 		case "minLowercase":
 			if !minLowercase(body.Password, x) {
-                        /*função que confere se tem o mínimo pedido de caracteres em 
+                        /*função que confere se tem o mínimo pedido de caracteres em
                         lowercase*/
 				flag = false
 				noMatch = append(noMatch, rule)
@@ -194,7 +196,7 @@ func minSpecialChars(s string, x int) bool {
 			if r == c { // se for igual adiciona a contagem
 				count++
 				break
-         /* se for igual não vai ser igual a outro então faz o break no for e pula para 
+         /* se for igual não vai ser igual a outro então faz o break no for e pula para
         próximo caracter da string*/
 			}
 		}
@@ -211,7 +213,7 @@ func noRepeted(s string) bool {
 for i := 1; i < len(s)-1; i++ {
 /*percorre a string a partir do segundo caractere
  comparando ele com o caracter anterior e com o próximo caracter */
-		if s[i] == s[i-1] || s[i] == s[i+1] { 
+		if s[i] == s[i-1] || s[i] == s[i+1] {
 			return false
                     /* se existir repetição ele já retorna á função anterior para que
                          possa ser retornada ao cliente*/
